@@ -1,0 +1,6 @@
+from typing import Any, Protocol
+
+
+class AppContext(Protocol):
+    async def log(self, level: str, message: str) -> None: ...
+    async def emit_event(self, name: str, data: Any) -> None: ...

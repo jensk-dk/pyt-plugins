@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myapp-example-plugin1"
+version = "0.1.0"
+description = "Example plugin 1 — greeter"
+requires-python = ">=3.10"
+dependencies = ["myapp-plugin-sdk"]
+
+[project.entry-points."myapp.plugins"]
+greeter = "myapp_example_plugin1.plugin:GreeterPlugin"
+
+[tool.setuptools.packages.find]
+include = ["myapp_example_plugin1*"]

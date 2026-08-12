@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  typecheck:
+    name: Type-check (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Install packages (editable)
+        run: |
+          pip install -e myapp-plugin-sdk
+          pip install -e myapp-example-plugins1
+          pip install -e myapp-example-plugins2
+
+      - name: Run mypy
+        run: bash typecheck.sh
+
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Install packages (editable)
+        run: |
+          pip install -e myapp-plugin-sdk
+          pip install -e myapp-example-plugins1
+          pip install -e myapp-example-plugins2
+
+      - name: Run tests
+        run: pytest
+
+      - name: Smoke test
+        run: cd myapp && python main.py
