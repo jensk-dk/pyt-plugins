@@ -5,7 +5,7 @@ A demonstration of a Python plugin system with the following features.
 * The host application can discover and load plugins at runtime using standard Python packaging (`importlib.metadata` entry points).
 * The plugin system is kept in an SDK package separate from both the plugins and the application loading the plugins. This ensures that the app does not know about the plugin implementation and conversely that the plugins only know about the app interface.
 * Plugins can have different types. Each plugin type share a common interface, but can also have additional functionality per type.
-* The application can also has and interface, so the plugins can call functionality on the loading app.
+* The application can also has an interface, so the plugins can call functionality on the loading app.
 * Two example plugin types and example implementations are provided.
 
 ## Repository layout
@@ -54,7 +54,7 @@ class PluginType(Enum):
 
 ### PluginSetting
 
-Each setting is a dataclass with four fields:
+The app can get a list of whatever settings a plugin supports, and set them individually. Each setting is a dataclass with four fields:
 
 | field | type | description |
 |---|---|---|
