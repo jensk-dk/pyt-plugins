@@ -4,7 +4,7 @@ import pytest
 
 from app_context import DefaultAppContext
 from plugin_loader import load_plugins, unload_plugins
-from myapp_plugin_sdk import PluginBase
+from myapp_plugin_sdk import PluginBaseV1
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ async def test_load_plugins_no_entry_points(ctx: DefaultAppContext) -> None:
 
 
 async def test_load_plugins_invokes_load(ctx: DefaultAppContext) -> None:
-    plugin = MagicMock(spec=PluginBase)
+    plugin = MagicMock(spec=PluginBaseV1)
     plugin.load = AsyncMock()
     ep = MagicMock()
     ep.load.return_value = lambda: plugin
@@ -48,7 +48,7 @@ async def test_load_plugins_skips_non_protocol(
 
 
 async def test_unload_plugins_calls_unload() -> None:
-    plugin = MagicMock(spec=PluginBase)
+    plugin = MagicMock(spec=PluginBaseV1)
     plugin.unload = AsyncMock()
 
     await unload_plugins([plugin])

@@ -66,6 +66,17 @@ def test_get_tag_returns_bool_or_none(plugin: GreeterPlugin) -> None:
     assert result is None or isinstance(result, bool)
 
 
+def test_get_tags_returns_list(plugin: GreeterPlugin) -> None:
+    tags = plugin.get_tags()
+    assert isinstance(tags, list)
+    assert all(isinstance(t, str) for t in tags)
+
+
+def test_get_tags_known_tags_have_answers(plugin: GreeterPlugin) -> None:
+    for tag in plugin.get_tags():
+        assert plugin.get_tag(tag) is not None
+
+
 async def test_load_calls_ctx_log() -> None:
     p = GreeterPlugin()
     ctx = MagicMock()

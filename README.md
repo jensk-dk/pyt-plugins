@@ -24,9 +24,12 @@ myapp/                   Host application example
 ```
 AppContext (Protocol)   log(level, message) · emit_event(name, data)
 
-PluginBase (Protocol)   name · subsystem · load(ctx) · unload() · get_settings() · set_setting() · get_tag(tag)
-├── PluginGreeter       greet(target) → str
-└── PluginTime          get_time() → str
+PluginBaseV1 (Protocol)   name · subsystem · load(ctx) · unload() · get_settings() · set_setting()
+PluginBaseV2 (Protocol)   + get_tag(tag) · get_tags()
+├── PluginGreeter           greet(target) → str
+└── PluginTime              get_time() → str
+
+PluginBase = PluginBaseV2   (alias — always points to the latest version)
 ```
 
 `AppContext` is the **host interface** — the app implements it and passes it to `load()`. Plugins call back into the app through this object for logging, events, and any future host services.
@@ -38,6 +41,7 @@ PluginBase (Protocol)   name · subsystem · load(ctx) · unload() · get_settin
 - **`get_settings()`** — returns a list of `PluginSetting` objects describing all configuration variables
 - **`set_setting(name, value)`** — update a configuration variable by name; raises `KeyError` for unknown names, `TypeError` for wrong value types
 - **`get_tag(tag)`** — capability query; returns `True`/`False` if the plugin explicitly supports or rejects a feature, or `None` if the tag is unrecognised (the app decides the default)
+- **`get_tags()`** — returns a list of tag strings for which this plugin returns a non-`None` answer from `get_tag`; lets the host enumerate supported features without probing blindly
 - **`greet()`** / **`get_time()`** — type-specific methods called by the host
 
 `PluginType` is an `Enum` that can be expanded as support for more subsystems is added:
@@ -158,6 +162,33 @@ Current time: 2026-08-12T12:00:00
 [INFO] greeter unloaded.
 [INFO] timestamp unloaded.
 ```
+
+## Protocol versioning
+
+The SDK uses an **additive versioning** scheme. Each new Protocol version extends the previous one so that a host built against a newer SDK can still load plugins built against an older SDK.
+
+| Protocol | Adds |
+|---|---|
+| `PluginBaseV1` | Core contract: identity, lifecycle, settings |
+| `PluginBaseV2` | Capability queries: `get_tag`, `get_tags` |
+
+`PluginBase` is always an alias for the latest version and is what new plugin authors should use.
+
+The host loader accepts any plugin that satisfies **`PluginBaseV1`** as a minimum. Before calling V2 methods it guards with `isinstance`:
+
+```python
+from myapp_plugin_sdk import PluginBaseV2
+
+for plugin in plugins:
+    if isinstance(plugin, PluginBaseV2):
+        known_tags = plugin.get_tags()
+        supports_html = plugin.get_tag("supports-html")
+    else:
+        known_tags = []
+        supports_html = None  # V1 plugin — apply host default
+```
+
+To add a future **V3**, extend `PluginBaseV2`, reassign `PluginBase = PluginBaseV3`, and guard every new call with `isinstance(plugin, PluginBaseV3)`.
 
 ## Feature tags
 

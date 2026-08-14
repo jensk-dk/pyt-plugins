@@ -42,6 +42,9 @@ class GreeterPlugin(PluginGreeter):
     def get_tag(self, tag: str) -> bool | None:
         return None
 
+    def get_tags(self) -> list[str]:
+        return []
+
     def greet(self, target: str = "World") -> str:
         prefix = self._settings["prefix"].value
         punct  = self._settings["punctuation"].value

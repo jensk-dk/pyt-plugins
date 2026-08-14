@@ -6,7 +6,7 @@ from .plugin_type import PluginType
 
 
 @runtime_checkable
-class PluginBase(Protocol):
+class PluginBaseV1(Protocol):
     @property
     def name(self) -> str: ...
 
@@ -18,5 +18,13 @@ class PluginBase(Protocol):
 
     def get_settings(self) -> list[PluginSetting]: ...
     def set_setting(self, name: str, value: Any) -> None: ...
+
+
+@runtime_checkable
+class PluginBaseV2(PluginBaseV1, Protocol):
     # None means the tag is not recognised; the app decides the default
     def get_tag(self, tag: str) -> bool | None: ...
+    def get_tags(self) -> list[str]: ...
+
+
+PluginBase = PluginBaseV2

@@ -43,6 +43,9 @@ class TimestampPlugin(PluginTime):
     def get_tag(self, tag: str) -> bool | None:
         return None
 
+    def get_tags(self) -> list[str]:
+        return []
+
     def get_time(self) -> str:
         tz  = timezone(timedelta(hours=self._settings["utc_offset_hours"].value))
         fmt = self._settings["format"].value
