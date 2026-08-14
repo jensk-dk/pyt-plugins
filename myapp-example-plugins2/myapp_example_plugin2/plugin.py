@@ -40,6 +40,9 @@ class TimestampPlugin(PluginTime):
             raise TypeError(f"{name!r} expects {s.type.__name__}, got {type(value).__name__}")
         s.value = value
 
+    def get_tag(self, tag: str) -> bool | None:
+        return None
+
     def get_time(self) -> str:
         tz  = timezone(timedelta(hours=self._settings["utc_offset_hours"].value))
         fmt = self._settings["format"].value

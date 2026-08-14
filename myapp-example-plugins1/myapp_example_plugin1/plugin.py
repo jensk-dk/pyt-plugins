@@ -39,6 +39,9 @@ class GreeterPlugin(PluginGreeter):
             raise TypeError(f"{name!r} expects {s.type.__name__}, got {type(value).__name__}")
         s.value = value
 
+    def get_tag(self, tag: str) -> bool | None:
+        return None
+
     def greet(self, target: str = "World") -> str:
         prefix = self._settings["prefix"].value
         punct  = self._settings["punctuation"].value

@@ -24,7 +24,7 @@ myapp/                   Host application example
 ```
 AppContext (Protocol)   log(level, message) · emit_event(name, data)
 
-PluginBase (Protocol)   name · subsystem · load(ctx) · unload() · get_settings() · set_setting()
+PluginBase (Protocol)   name · subsystem · load(ctx) · unload() · get_settings() · set_setting() · get_tag(tag)
 ├── PluginGreeter       greet(target) → str
 └── PluginTime          get_time() → str
 ```
@@ -37,6 +37,7 @@ PluginBase (Protocol)   name · subsystem · load(ctx) · unload() · get_settin
 - **`unload()`** — async; called on shutdown to release resources
 - **`get_settings()`** — returns a list of `PluginSetting` objects describing all configuration variables
 - **`set_setting(name, value)`** — update a configuration variable by name; raises `KeyError` for unknown names, `TypeError` for wrong value types
+- **`get_tag(tag)`** — capability query; returns `True`/`False` if the plugin explicitly supports or rejects a feature, or `None` if the tag is unrecognised (the app decides the default)
 - **`greet()`** / **`get_time()`** — type-specific methods called by the host
 
 `PluginType` is an `Enum` that can be expanded as support for more subsystems is added:
@@ -104,6 +105,10 @@ Each setting is a dataclass with four fields:
                raise TypeError(f"{name!r} expects {s.type.__name__}")
            s.value = value
 
+       def get_tag(self, tag: str) -> bool | None:
+           tags = {"supports-html": False}
+           return tags.get(tag)  # None for unrecognised tags
+
        def greet(self, target: str = "World") -> str:
            return f"{self._settings['prefix'].value}, {target}!"
    ```
@@ -152,6 +157,42 @@ Current time: 2026-08-12T12:00:00
 
 [INFO] greeter unloaded.
 [INFO] timestamp unloaded.
+```
+
+## Feature tags
+
+`get_tag(tag)` lets the host query a plugin for optional capability flags without requiring a new Protocol method for every feature. The return value is a three-way signal:
+
+| Return | Meaning |
+|---|---|
+| `True` | Plugin explicitly supports this feature |
+| `False` | Plugin explicitly does not support this feature |
+| `None` | Tag not recognised — the host applies its own default |
+
+Example on the host side:
+
+```python
+DEFAULT_SUPPORTS_HTML = False
+
+for plugin in plugins:
+    supports_html = plugin.get_tag("supports-html")
+    if supports_html is None:
+        supports_html = DEFAULT_SUPPORTS_HTML
+    if supports_html:
+        render_html(plugin.greet())
+    else:
+        print(plugin.greet())
+```
+
+Example on the plugin side:
+
+```python
+def get_tag(self, tag: str) -> bool | None:
+    tags: dict[str, bool] = {
+        "supports-html": True,
+        "supports-multiline": False,
+    }
+    return tags.get(tag)  # returns None for any unrecognised tag
 ```
 
 ## Type checking

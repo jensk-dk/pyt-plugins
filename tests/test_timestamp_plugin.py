@@ -49,6 +49,15 @@ def test_get_settings_names(plugin: TimestampPlugin) -> None:
     assert {s.name for s in plugin.get_settings()} == {"format", "utc_offset_hours"}
 
 
+def test_get_tag_unknown_returns_none(plugin: TimestampPlugin) -> None:
+    assert plugin.get_tag("unknown-feature") is None
+
+
+def test_get_tag_returns_bool_or_none(plugin: TimestampPlugin) -> None:
+    result = plugin.get_tag("any-tag")
+    assert result is None or isinstance(result, bool)
+
+
 async def test_load_calls_ctx_log() -> None:
     p = TimestampPlugin()
     ctx = MagicMock()

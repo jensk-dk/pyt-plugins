@@ -57,6 +57,15 @@ def test_get_settings_names(plugin: GreeterPlugin) -> None:
     assert {s.name for s in plugin.get_settings()} == {"prefix", "punctuation"}
 
 
+def test_get_tag_unknown_returns_none(plugin: GreeterPlugin) -> None:
+    assert plugin.get_tag("unknown-feature") is None
+
+
+def test_get_tag_returns_bool_or_none(plugin: GreeterPlugin) -> None:
+    result = plugin.get_tag("any-tag")
+    assert result is None or isinstance(result, bool)
+
+
 async def test_load_calls_ctx_log() -> None:
     p = GreeterPlugin()
     ctx = MagicMock()
